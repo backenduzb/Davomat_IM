@@ -11,7 +11,7 @@ def main():
         raise ImportError("Couldn't import Django.") from exc
 
     if 'runbot' in sys.argv:
-        from bot.main import bot_main
+        from src.bot.bot import bot_main
         asyncio.run(bot_main())
         return  
     
