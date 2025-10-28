@@ -10,4 +10,4 @@ WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = 8080
 WEBHOOK_PATH = "/webhook"
 WEBHOOK_SECRET = "webhook_AAFnKJiSiecmgd_giX25CzeTRGAvf1ec0Zs"
-BASE_WEBHOOK_URL = "https://telegram-davomatim.up.railway.app"
+BASE_WEBHOOK_URL = "https://telegram-davomatim.abdulkhafizov.uz"
