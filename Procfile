@@ -1,1 +1,1 @@
-web: sh -c "python bot/main.py && python manage.py runserver 0.0.0.0:8000"
+web: sh -c "python manage.py runbot && python manage.py runserver 0.0.0.0:8000"
