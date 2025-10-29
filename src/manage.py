@@ -13,7 +13,6 @@ def main():
 
     django.setup()
 
-    # Custom command: createadmin
     if 'createadmin' in sys.argv:
         from django.contrib.auth.models import User
         if not User.objects.filter(username="superadmin").exists():
@@ -28,7 +27,7 @@ def main():
         return 
     
     if 'runbot' in sys.argv:
-        from src.bot.bot import bot_main
+        from src.bot import bot_main
         asyncio.run(bot_main())
         return
 
