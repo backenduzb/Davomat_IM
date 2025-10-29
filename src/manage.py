@@ -2,6 +2,7 @@
 import os
 import sys
 import asyncio
+import django
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -10,12 +11,29 @@ def main():
     except ImportError as exc:
         raise ImportError("Couldn't import Django.") from exc
 
+    django.setup()
+
+    # Custom command: createadmin
+    if 'createadmin' in sys.argv:
+        from django.contrib.auth.models import User
+        if not User.objects.filter(username="superadmin").exists():
+            User.objects.create_superuser(
+                username="superadmin",
+                password="superadmin02",
+                email="admin@example.com",
+            )
+            print("✅ Superuser 'superadmin' created successfully!")
+        else:
+            print("⚠️  Superuser 'superadmin' already exists.")
+        return 
+    
     if 'runbot' in sys.argv:
         from src.bot.bot import bot_main
         asyncio.run(bot_main())
-        return  
-    
+        return
+
     execute_from_command_line(sys.argv)
+
 
 if __name__ == '__main__':
     main()
