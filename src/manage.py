@@ -13,7 +13,6 @@ def main():
 
     django.setup()
 
-    # Custom command: createadmin
     if 'createadmin' in sys.argv:
         from django.contrib.auth.models import User
         if not User.objects.filter(username="superadmin").exists():

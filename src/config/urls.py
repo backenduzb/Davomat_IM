@@ -7,5 +7,5 @@ urlpatterns = [
     path('admin/', admin_site.urls),  
     path('', include("main.urls")),    
     path('upload/', include("upload.urls")),  
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)  # Static fayllarni xizmat ko'rsatish
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)  
 
