@@ -14,4 +14,4 @@ RUN python /app/src/manage.py collectstatic --noinput || true
 
 EXPOSE 8000
 
-ENTRYPOINT ["sh", "/app/entrypoint.sh"]
+ENTRYPOINT ["sh", "/app/src/entrypoint.sh"]
