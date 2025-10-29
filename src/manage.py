@@ -27,7 +27,7 @@ def main():
         return 
     
     if 'runbot' in sys.argv:
-        from src.telegram_bot import main
+        from .telegram_bot import main
         asyncio.run(main())
         return
 
