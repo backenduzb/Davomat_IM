@@ -1,4 +1,4 @@
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
@@ -7,10 +7,20 @@ from bot.database.admin import get_admin_tg_ids, get_all_no
 from bot.keyboards.reply.admin import all_class
 from bot.keyboards.inline.button import finish
 from bot.states.user import TeacherStates, AdminStates
+from bot.keyboards.reply.student import reastart
 
 router = Router()
 
-@router.message(Command('start'))
+@router.message(Command("start"))
+async def cmd_start(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer(
+        f"Assalomu alaykum <b>{message.from_user.full_name}</b> 👋",
+                         reply_markup=await reastart()
+                         )
+
+
+@router.message(F.text == "Davomat topshirish 📝")
 async def start(message: types.Message, state: FSMContext):
     await state.clear()
     user_id = str(message.from_user.id)
@@ -57,4 +67,4 @@ async def start(message: types.Message, state: FSMContext):
         await state.set_state(TeacherStates.waiting_no_reason_student)
 
     else:
-        await message.answer(f"Assalomu alaykum <b>{message.from_user.full_name}</b>!")
+        await message.answer(f"<b>{message.from_user.full_name}</b>! Afsuski siz davomat topshira olmaysiz.")

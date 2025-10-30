@@ -5,6 +5,7 @@ from bot.database.student import get_student_id, edit_student_no_reason, edit_st
 from bot.database.teacher import get_teacher_information
 from bot.keyboards.inline.button import finish_or_continue, finish
 from bot.keyboards.reply.student import students_keyboard
+from bot.keyboards.reply.student import reastart
 
 router = Router()
 
@@ -104,7 +105,8 @@ async def finish_reason_list(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.answer(
         f"📊 <b>{class_name}</b> sinfi bo‘yicha kelmaganlar ma’lumotlari yangilandi ✅\n\n"
         f"🚫 <b>Sababsizlar:</b>\n{no_reason_text}\n\n"
-        f"🟡 <b>Sabablilar:</b>\n{reason_text}"
+        f"🟡 <b>Sabablilar:</b>\n{reason_text}",
+        reply_markup=await reastart()
     )
 
 @router.callback_query(F.data=="clear_reason_teacher")

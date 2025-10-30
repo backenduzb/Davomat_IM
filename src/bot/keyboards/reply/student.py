@@ -10,3 +10,14 @@ async def students_keyboard(teacher_id: str)->ReplyKeyboardMarkup:
         resize_keyboard=True
     )
     return keyboard
+
+async def reastart() -> ReplyKeyboardMarkup:
+
+    button = [
+        [KeyboardButton(text="Davomat topshirish 📝")]
+    ]
+
+    return ReplyKeyboardMarkup(
+        resize_keyboard=True,
+        keyboard=button
+    )

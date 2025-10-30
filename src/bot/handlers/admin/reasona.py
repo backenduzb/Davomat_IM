@@ -1,6 +1,7 @@
 from aiogram import Router, types, F
 from bot.database.admin import get_admin_tg_ids, get_student_id
 from bot.keyboards.reply.admin import all_students
+from bot.keyboards.reply.student import reastart
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import BaseFilter
 from bot.states.user import AdminStates
@@ -106,7 +107,8 @@ async def finish_reason_list(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.answer(
         f"📊 <b>{class_name}</b> sinfi bo‘yicha kelmaganlar ma’lumotlari yangilandi ✅\n\n"
         f"🚫 <b>Sababsizlar:</b>\n{no_reason_text}\n\n"
-        f"🟡 <b>Sabablilar:</b>\n{reason_text}"
+        f"🟡 <b>Sabablilar:</b>\n{reason_text}",
+        reply_markup=await reastart()
     )
 
 @router.callback_query(F.data=="clear_reason_admin")
