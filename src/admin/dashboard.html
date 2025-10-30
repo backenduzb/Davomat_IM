@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             console.log("Refresh bosildi, so'rov yuborilmoqda...");
 
-            fetch("{% url 'set_null_all' %}", { 
+            fetch("https://davomatim.up.railway.app/upload/set_null_all/", { 
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),
@@ -108,7 +108,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Excel yuklash funksiyasi (sizning kodingiz)
     if (uploadBtn) {
         const fileInput = document.createElement("input");
         fileInput.type = "file";
@@ -128,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const formData = new FormData();
             formData.append("file", file);
 
-            fetch("{% url 'export_xlsx_to_models' %}", {  
+            fetch("https://davomatim.up.railway.app/upload/export_xlsx/", {  
                 method: "POST",
                 body: formData,
                 headers: {
@@ -157,7 +156,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Diagramma ma'lumotlarini yuklash
     function fetchDashboardData() {
         fetch("{% url 'dashboard_inf' %}")  
             .then((response) => {
@@ -172,12 +170,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 const reason = data.reason || 0;
                 const no_reason = data.no_reason || 0;
 
-                // Eski diagrammani yo'q qilish
                 if (window.studentsChart) {
                     window.studentsChart.destroy();
                 }
 
-                // Yangi diagramma yaratish
                 window.studentsChart = new Chart(ctx, {
                     type: "doughnut",
                     data: {
@@ -219,7 +215,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<!-- Sinflar diagrammalari uchun alohida script -->
 {% for i in class_stats %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
