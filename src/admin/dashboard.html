@@ -17,8 +17,9 @@
     <a href="#" id="upload-excel-btn" class="btn btn-success">
         <i class="fas fa-upload"></i> Excel yuklash
     </a>
+    {% csrf_token %}
     <a href="#" id="refresh" class="btn btn-warning">
-        <i class="fas fa-sync-alt"></i> Tozalash
+        <i class="fas fa-sync-alt"></i>
     </a>
 </div>
 {% endblock %}
@@ -38,24 +39,56 @@
         <p>{{ i.name }}</p>
         <canvas id="chart_{{ forloop.counter }}" width="350" height="350"></canvas>
     </div>
+    <script>
+        const ctx{{ forloop.counter }} = document.getElementById("chart_{{ forloop.counter }}").getContext("2d");
+        const total{{ forloop.counter }} = {{ i.visited|default:0 }};
+        const reason{{ forloop.counter }} = {{ i.reason|default:0 }};
+        const no_reason{{ forloop.counter }} = {{ i.no_reason|default:0 }};
+
+        new Chart(ctx{{ forloop.counter }}, {
+            type: "doughnut",
+            data: {
+                labels: ["Kelganlar", "Kelmaganlar", "Sababli"],
+                datasets: [{
+                    data: [total{{ forloop.counter }}, reason{{ forloop.counter }}, no_reason{{ forloop.counter }}],
+                    backgroundColor: ["#00b624", "#f44336", "#ebcf00"],
+                    borderWidth: 2,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: true, position: "bottom" },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const total = total{{ forloop.counter }} + reason{{ forloop.counter }} + no_reason{{ forloop.counter }};
+                                const percent = total > 0 ? (context.raw / total * 100).toFixed(1) : 0;
+                                return `${context.label}: ${context.raw} (${percent}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    {% empty %}
+    <p>Sinflar yo‘q</p>
     {% endfor %}
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
     const uploadBtn = document.getElementById("upload-excel-btn");
     const refreshBtn = document.getElementById("refresh");
     const ctx = document.getElementById("studentsChart").getContext("2d");
 
-    // CSRF token olish funksiyasi
-    function getCSRFToken() {
-        // Birinchi navbatda form ichidagi CSRF token ni topish
-        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (tokenInput) {
-            return tokenInput.value;
-        }
         
-        // Cookie orqali CSRF token ni olish
+
+    function getCSRFToken() {
+        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (tokenInput) return tokenInput.value;
+
         const cookies = document.cookie.split(';');
         for (let cookie of cookies) {
             if (cookie.trim().startsWith('csrftoken=')) {
@@ -65,50 +98,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return '';
     }
 
-    // Refresh tugmasi uchun funksiya
-    if (refreshBtn) {
-        refreshBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            
-            if (!confirm("Barcha o'quvchilarning statusini 'Bor' va sababini bo'sh qilasizmi?")) {
-                return;
-            }
-
-            console.log("Refresh bosildi, so'rov yuborilmoqda...");
-
-            fetch("{% url 'set_null_all' %}", { 
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": getCSRFToken(),
-                    "Content-Type": "application/json",
-                },
-            })
-            .then(async (response) => {
-                console.log("Javob statusi:", response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP xatolik! Status: ${response.status}`);
-                }
-                
-                return response.json();
-            })
-            .then((data) => {
-                console.log("Server javobi:", data);
-                if (data.success || data.message) {
-                    alert(data.message || "Muvaffaqiyatli amalga oshirildi!");
-                    location.reload();
-                } else if (data.error) {
-                    alert("Xatolik: " + data.error);
-                }
-            })
-            .catch((error) => {
-                console.error("Xatolik:", error);
-                alert("So'rov yuborishda xatolik: " + error.message);
-            });
-        });
-    }
-
-    // Excel yuklash funksiyasi (sizning kodingiz)
     if (uploadBtn) {
         const fileInput = document.createElement("input");
         fileInput.type = "file";
@@ -128,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const formData = new FormData();
             formData.append("file", file);
 
-            fetch("{% url 'export_xlsx_to_models' %}", {  
+            fetch("/upload/export_xlsx/", {
                 method: "POST",
                 body: formData,
                 headers: {
@@ -146,8 +135,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         alert("Xatolik: " + data.error);
                     }
                 } catch (err) {
-                    console.error("HTML yoki JSON bo'lmagan javob:", text);
-                    alert("Serverdan noto'g'ri javob keldi.");
+                    console.error("HTML yoki JSON bo‘lmagan javob:", text);
+                    alert("Serverdan noto‘g‘ri javob keldi. URL yoki view nomi tekshirilishi kerak.");
                 }
             })
             .catch((err) => {
@@ -157,51 +146,67 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Diagramma ma'lumotlarini yuklash
-    function fetchDashboardData() {
-        fetch("{% url 'dashboard_inf' %}")  
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            if (!confirm("Barcha o‘quvchilarning statusini 'Bor' va sababini bo‘sh qilasizmi?")) return;
+
+            fetch("/upload/set_null_all/", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken(),
+                },
+                credentials: "include", 
             })
-            .then((data) => {
-                const visited = data.visited || 0;
-                const total = data.total || 0;
-                const reason = data.reason || 0;
-                const no_reason = data.no_reason || 0;
-
-                // Eski diagrammani yo'q qilish
-                if (window.studentsChart) {
-                    window.studentsChart.destroy();
+            .then(async (res) => {
+                const text = await res.text();
+                try {
+                    const data = JSON.parse(text);
+                    if (data.message) {
+                        alert(data.message);
+                        location.reload();
+                    } else if (data.error) {
+                        alert("Xatolik: " + data.error);
+                    }
+                } catch (err) {
+                    console.error("HTML yoki JSON bo‘lmagan javob:", text);
+                    alert("Serverdan noto‘g‘ri javob keldi.");
                 }
+            })
+            .catch((err) => {
+                console.error(err);
+                alert("Xatolik yuz berdi: " + err.message);
+            });
+        });
+    }
+    function fetchDashboardData() {
+        fetch("/dashboard_inf/")
+            .then((response) => response.json())
+            .then((data) => {
+                const visited = data.visited;
+                const total = data.total;
+                const reason = data.reason;
+                const no_reason = data.no_reason;
 
-                // Yangi diagramma yaratish
-                window.studentsChart = new Chart(ctx, {
+                new Chart(ctx, {
                     type: "doughnut",
                     data: {
                         labels: ["Kelganlar", "Kelmaganlar", "Sababli"],
                         datasets: [{
-                            data: [visited, no_reason, reason],
+                            data: [visited, reason, no_reason],
                             backgroundColor: ["#00b624", "#f44336", "#ebcf00"],
                             borderWidth: 2,
                             hoverOffset: 10
                         }]
                     },
                     options: {
-                        responsive: true,
                         plugins: {
-                            legend: { 
-                                display: true, 
-                                position: "bottom" 
-                            },
+                            legend: { display: true, position: "bottom" },
                             tooltip: {
                                 callbacks: {
                                     label: function (context) {
-                                        const value = context.raw;
-                                        const total = visited + no_reason + reason;
-                                        const percent = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                                        let value = context.raw;
+                                        let percent = total > 0 ? (value / total * 100).toFixed(1) : 0;
                                         return `${context.label}: ${value} (${percent}%)`;
                                     }
                                 }
@@ -211,51 +216,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             })
             .catch((err) => {
-                console.error("Diagramma ma'lumotlarini yuklashda xatolik:", err);
+                console.error("Xatolik:", err);
+                alert("Serverdan ma'lumot olishda xatolik yuz berdi.");
             });
     }
 
     fetchDashboardData();
 });
 </script>
-
-<!-- Sinflar diagrammalari uchun alohida script -->
-{% for i in class_stats %}
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const ctx{{ forloop.counter }} = document.getElementById("chart_{{ forloop.counter }}").getContext("2d");
-    const total{{ forloop.counter }} = {{ i.visited|default:0 }};
-    const reason{{ forloop.counter }} = {{ i.reason|default:0 }};
-    const no_reason{{ forloop.counter }} = {{ i.no_reason|default:0 }};
-
-    new Chart(ctx{{ forloop.counter }}, {
-        type: "doughnut",
-        data: {
-            labels: ["Kelganlar", "Kelmaganlar", "Sababli"],
-            datasets: [{
-                data: [total{{ forloop.counter }}, no_reason{{ forloop.counter }}, reason{{ forloop.counter }}],
-                backgroundColor: ["#00b624", "#f44336", "#ebcf00"],
-                borderWidth: 2,
-                hoverOffset: 10
-            }]
-        },
-        options: {
-            plugins: {
-                legend: { display: true, position: "bottom" },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            const total = total{{ forloop.counter }} + reason{{ forloop.counter }} + no_reason{{ forloop.counter }};
-                            const percent = total > 0 ? (context.raw / total * 100).toFixed(1) : 0;
-                            return `${context.label}: ${context.raw} (${percent}%)`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-});
-</script>
-{% endfor %}
-
 {% endblock %}
+
+
+mana shu yerda faqat hamma oquvchilarni tozalash yani refresh tugmasi ishlamayapti
