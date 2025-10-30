@@ -220,12 +220,11 @@
 
 {% for i in class_stats %}
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const ctx{{ forloop.counter }
-    } = document.getElementById("chart_{{ forloop.counter }}").getContext("2d");
-    const total{{ forloop.counter }} = { { i.visited |default: 0 } };
-    const reason{{ forloop.counter }} = { { i.reason |default: 0 } };
-    const no_reason{{ forloop.counter }} = { { i.no_reason |default: 0 } };
+document.addEventListener("DOMContentLoaded", function() {
+    const ctx{{ forloop.counter }} = document.getElementById("chart_{{ forloop.counter }}").getContext("2d");
+    const total{{ forloop.counter }} = {{ i.visited|default:0 }};
+    const reason{{ forloop.counter }} = {{ i.reason|default:0 }};
+    const no_reason{{ forloop.counter }} = {{ i.no_reason|default:0 }};
 
     new Chart(ctx{{ forloop.counter }}, {
         type: "doughnut",
@@ -233,22 +232,20 @@
             labels: ["Kelganlar", "Kelmaganlar", "Sababli"],
             datasets: [{
                 data: [total{{ forloop.counter }}, no_reason{{ forloop.counter }}, reason{{ forloop.counter }}],
-        backgroundColor: ["#00b624", "#f44336", "#ebcf00"],
-        borderWidth: 2,
-        hoverOffset: 10
+                backgroundColor: ["#00b624", "#f44336", "#ebcf00"],
+                borderWidth: 2,
+                hoverOffset: 10
             }]
         },
         options: {
-        plugins: {
-            legend: { display: true, position: "bottom" },
-            tooltip: {
-                callbacks: {
-                    label: function (context) {
-                        const total = total{{ forloop.counter
-                }
-            } + reason{{ forloop.counter }} + no_reason{{ forloop.counter }};
-    const percent = total > 0 ? (context.raw / total * 100).toFixed(1) : 0;
-    return `${context.label}: ${context.raw} (${percent}%)`;
+            plugins: {
+                legend: { display: true, position: "bottom" },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const total = total{{ forloop.counter }} + reason{{ forloop.counter }} + no_reason{{ forloop.counter }};
+                            const percent = total > 0 ? (context.raw / total * 100).toFixed(1) : 0;
+                            return `${context.label}: ${context.raw} (${percent}%)`;
                         }
                     }
                 }
@@ -258,5 +255,6 @@
 });
 </script>
 {% endfor %}
+
 
 {% endblock %}
