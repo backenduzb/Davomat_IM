@@ -112,61 +112,6 @@
                 fileInput.click();
             });
 
-            if (refreshBtn) {
-                refreshBtn.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    if (!confirm("Barcha o'quvchilarning statusini 'Bor' va sababini bo'sh qilasizmi?")) return;
-
-                    // Loading holatini ko'rsatish
-                    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuklanmoqda...';
-                    refreshBtn.disabled = true;
-
-                    fetch("https://davomatim.up.railway.app/upload/export_xlsx/", {
-                        method: "POST",
-                        headers: {
-                            "X-CSRFToken": getCSRFToken(),
-                            "Content-Type": "application/json",
-                        },
-                        credentials: "same-origin",
-                    })
-                        .then(async (response) => {
-                            // Avvalo response statusini tekshiramiz
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-
-                            const contentType = response.headers.get("content-type");
-                            if (contentType && contentType.includes("application/json")) {
-                                return response.json();
-                            } else {
-                                const text = await response.text();
-                                throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
-                            }
-                        })
-                        .then((data) => {
-                            console.log("Server javobi:", data);
-
-                            if (data.success) {
-                                alert(data.message);
-                                location.reload();
-                            } else if (data.error) {
-                                alert("Xatolik: " + data.error);
-                            } else {
-                                alert("Noma'lum javob formati");
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Xatolik:", error);
-                            alert("So'rov yuborishda xatolik: " + error.message);
-                        })
-                        .finally(() => {
-                            // Tugmani qayta faollashtirish
-                            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Tozalash';
-                            refreshBtn.disabled = false;
-                        });
-                });
-            }
-
             fileInput.addEventListener("change", function () {
                 const file = fileInput.files[0];
                 if (!file) return;
@@ -206,36 +151,59 @@
         if (refreshBtn) {
             refreshBtn.addEventListener("click", function (e) {
                 e.preventDefault();
-                if (!confirm("Barcha o‘quvchilarning statusini 'Bor' va sababini bo‘sh qilasizmi?")) return;
+                if (!confirm("Barcha o'quvchilarning statusini 'Bor' va sababini bo'sh qilasizmi?")) return;
+
+                // Loading holatini ko'rsatish
+                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuklanmoqda...';
+                refreshBtn.disabled = true;
 
                 fetch("https://davomatim.up.railway.app/upload/set_null_all/", {
                     method: "POST",
                     headers: {
                         "X-CSRFToken": getCSRFToken(),
+                        "Content-Type": "application/json",
                     },
-                    credentials: "include",
+                    credentials: "same-origin",
                 })
-                    .then(async (res) => {
-                        const text = await res.text();
-                        try {
-                            const data = JSON.parse(text);
-                            if (data.message) {
-                                alert(data.message);
-                                location.reload();
-                            } else if (data.error) {
-                                alert("Xatolik: " + data.error);
-                            }
-                        } catch (err) {
-                            console.error("HTML yoki JSON bo‘lmagan javob:", text);
-                            alert("Serverdan noto‘g‘ri javob keldi.");
+                    .then(async (response) => {
+                        // Avvalo response statusini tekshiramiz
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const contentType = response.headers.get("content-type");
+                        if (contentType && contentType.includes("application/json")) {
+                            return response.json();
+                        } else {
+                            const text = await response.text();
+                            throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
                         }
                     })
-                    .catch((err) => {
-                        console.error(err);
-                        alert("Xatolik yuz berdi: " + err.message);
+                    .then((data) => {
+                        console.log("Server javobi:", data);
+
+                        if (data.success) {
+                            alert(data.message);
+                            location.reload();
+                        } else if (data.error) {
+                            alert("Xatolik: " + data.error);
+                        } else {
+                            alert("Noma'lum javob formati");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Xatolik:", error);
+                        alert("So'rov yuborishda xatolik: " + error.message);
+                    })
+                    .finally(() => {
+                        // Tugmani qayta faollashtirish
+                        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Tozalash';
+                        refreshBtn.disabled = false;
                     });
             });
         }
+
+        
         function fetchDashboardData() {
             fetch("/dashboard_inf/")
                 .then((response) => response.json())
@@ -283,3 +251,5 @@
 </script>
 {% endblock %}
 
+
+mana shu yerda faqat hamma oquvchilarni tozalash yani refresh tugmasi ishlamayapti
