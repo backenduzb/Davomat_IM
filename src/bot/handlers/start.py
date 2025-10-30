@@ -49,8 +49,8 @@ async def start(message: types.Message, state: FSMContext):
                 if info["no_reason"]:
                     text += "\n🔴 <b>Sababsiz yo‘qlar:</b>\n"
                     for i, s in enumerate(info["no_reason"], start=1):
-                        sababi = s["sababi"] or "Sabab ko‘rsatilmagan"
-                        text += f"{i}. {s['full_name']} — <i>{sababi}</i>\n"
+                     
+                        text += f"{i}. {s['full_name']}"
 
                 if info["reason"] or info["no_reason"]:
                     text += "\n"
