@@ -38,20 +38,25 @@ async def start(message: types.Message, state: FSMContext):
             text = "📊 <b>Sinf kesimidagi yo‘qlar ro‘yxati</b>\n\n"
             for class_name, info in data.items():
                 if info["reason"] or info["no_reason"]:
-                    text += f"🏫  {class_name}\n"
+                    text += f"🏫 <b>{class_name}</b> — {info['present_percent']}% o‘quvchi kelgan\n"
+
                 if info["reason"]:
-                    text += "🟡 <b>Sababli yo‘qlar:</b>\n"
-                    for s in info["reason"]:
+                    text += "\n🟡 <b>Sababli yo‘qlar:</b>\n"
+                    for i, s in enumerate(info["reason"], start=1):
                         sababi = s["sababi"] or "Sabab ko‘rsatilmagan"
-                        text += f"  ├ {s['full_name']} — <i>{sababi}</i>\n"
+                        text += f"{i}. {s['full_name']} — <i>{sababi}</i>\n"
+
                 if info["no_reason"]:
                     text += "\n🔴 <b>Sababsiz yo‘qlar:</b>\n"
-                    for s in info["no_reason"]:
+                    for i, s in enumerate(info["no_reason"], start=1):
                         sababi = s["sababi"] or "Sabab ko‘rsatilmagan"
-                        text += f"  ├ {s['full_name']} — <i>{sababi}</i>\n"
+                        text += f"{i}. {s['full_name']} — <i>{sababi}</i>\n"
+
                 if info["reason"] or info["no_reason"]:
                     text += "\n"
+
             await message.answer(text)
+
 
         await message.answer("Iltimos, to‘ldirish uchun sinfni tanlang 👇", reply_markup=await all_class())
         await state.set_state(AdminStates.waiting_class)

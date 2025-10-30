@@ -38,14 +38,18 @@ def get_all_no():
         'class_type__class_name__name', 'full_name', 'status', 'sababi'
     )
 
+    # Avval barcha sinflarni to'plab chiqamiz
     for s in students:
-        class_name = s['class_type__class_name__name'] 
+        class_name = s['class_type__class_name__name']
 
         if class_name not in result:
             result[class_name] = {
                 "reason": [],
-                "no_reason": []
+                "no_reason": [],
+                "total": 0
             }
+
+        result[class_name]["total"] += 1
 
         if s['status'] == "Sababli dars qoldirgan":
             result[class_name]['reason'].append({
@@ -60,4 +64,13 @@ def get_all_no():
                 "sababi": s['sababi']
             })
 
+    for class_name, info in result.items():
+        total = info["total"]
+        no_reason = len(info["no_reason"])
+        reason = len(info["reason"])
+        absent = no_reason + reason
+        present = total - absent
+        result[class_name]["present_percent"] = round((present / total) * 100, 1) if total else 0
+
     return result
+
