@@ -155,6 +155,7 @@
                 headers: {
                     "X-CSRFToken": getCSRFToken(),
                 },
+                credentials: "include", 
             })
             .then(async (res) => {
                 const text = await res.text();
