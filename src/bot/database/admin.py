@@ -38,8 +38,12 @@ def get_all_no():
         'class_type__class_name__name', 'full_name', 'status', 'sababi'
     )
 
-    # Avval barcha sinflarni to'plab chiqamiz
+    total_students = 0
+    total_reason = 0
+    total_no_reason = 0
+
     for s in students:
+        total_students += 1
         class_name = s['class_type__class_name__name']
 
         if class_name not in result:
@@ -54,23 +58,35 @@ def get_all_no():
         if s['status'] == "Sababli dars qoldirgan":
             result[class_name]['reason'].append({
                 "full_name": s['full_name'],
-                "status": s['status'],
                 "sababi": s['sababi']
             })
+            total_reason += 1
         elif s['status'] == "Darsga kelmagan":
             result[class_name]['no_reason'].append({
                 "full_name": s['full_name'],
-                "status": s['status'],
                 "sababi": s['sababi']
             })
+            total_no_reason += 1
 
+    # Foizlar
     for class_name, info in result.items():
         total = info["total"]
-        no_reason = len(info["no_reason"])
-        reason = len(info["reason"])
-        absent = no_reason + reason
+        absent = len(info["reason"]) + len(info["no_reason"])
         present = total - absent
         result[class_name]["present_percent"] = round((present / total) * 100, 1) if total else 0
 
+    # Umumiy ma'lumot
+    total_absent = total_reason + total_no_reason
+    total_present_percent = round(((total_students - total_absent) / total_students) * 100, 1) if total_students else 0
+
+    result["_summary"] = {
+        "total_students": total_students,
+        "total_reason": total_reason,
+        "total_no_reason": total_no_reason,
+        "total_absent": total_absent,
+        "total_present_percent": total_present_percent
+    }
+
     return result
+
 

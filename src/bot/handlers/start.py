@@ -9,6 +9,7 @@ from bot.keyboards.inline.button import finish
 from bot.states.user import TeacherStates, AdminStates
 from bot.keyboards.reply.student import reastart
 
+
 router = Router()
 
 @router.message(Command("start"))
@@ -32,10 +33,13 @@ async def start(message: types.Message, state: FSMContext):
         await message.answer(f"Assalomu alaykum <b>{message.from_user.full_name}</b> 👋")
 
         data = await get_all_no()
+        
         if not data:
             await message.answer("📭 Hozircha hech qanday dars qoldirgan o‘quvchilar yo‘q.")
         else:
+            summary = data.pop("_summary", None)
             text = "📊 <b>Sinf kesimidagi yo‘qlar ro‘yxati</b>\n\n"
+
             for class_name, info in data.items():
                 if info["reason"] or info["no_reason"]:
                     text += f"🏫 <b>{class_name}</b> — {info['present_percent']}% o‘quvchi kelgan\n"
@@ -49,10 +53,46 @@ async def start(message: types.Message, state: FSMContext):
                 if info["no_reason"]:
                     text += "\n🔴 <b>Sababsiz yo‘qlar:</b>\n"
                     for i, s in enumerate(info["no_reason"], start=1):
-                        text += f"{i}. {s['full_name']}\n"
+                        sababi = s["sababi"] or "Sabab ko‘rsatilmagan"
+                        text += f"{i}. {s['full_name']} — <i>{sababi}</i>\n"
 
-                if info["reason"] or info["no_reason"]:
-                    text += "\n"
+                text += "\n"
+
+            if summary:
+                from django.utils import timezone
+                import pytz
+
+                uz_tz = pytz.timezone("Asia/Tashkent")
+                now_uz = timezone.now().astimezone(uz_tz)
+
+                oylar = {
+                    "January": "yanvar",
+                    "February": "fevral",
+                    "March": "mart",
+                    "April": "aprel",
+                    "May": "may",
+                    "June": "iyun",
+                    "July": "iyul",
+                    "August": "avgust",
+                    "September": "sentyabr",
+                    "October": "oktyabr",
+                    "November": "noyabr",
+                    "December": "dekabr",
+                }
+
+                oy_nomi = oylar[now_uz.strftime("%B")]
+                formatted_date = now_uz.strftime(f"%Y-yil %d-{oy_nomi}")
+
+
+
+                text += (
+                    f"📅 <b>{formatted_date} kungi davomat haqida MAʼLUMOT</b>\n\n"
+                    f"Jami: <b>{summary['total_students']}</b> nafar o‘quvchi\n"
+                    f"Shundan <b>{summary['total_absent']}</b> nafari kelmagan\n"
+                    f"{summary['total_reason']} nafari sababli\n"
+                    f"{summary['total_no_reason']} nafari sababsiz\n\n"
+                    f"Umumiy: <b>{summary['total_present_percent']}%</b>\n"
+                )
 
             await message.answer(text)
 
