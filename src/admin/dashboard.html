@@ -17,16 +17,15 @@
     <a href="#" id="upload-excel-btn" class="btn btn-success">
         <i class="fas fa-upload"></i> Excel yuklash
     </a>
-    {% csrf_token %}
     <a href="#" id="refresh" class="btn btn-warning">
-        <i class="fas fa-sync-alt"></i>
+        <i class="fas fa-sync-alt"></i> Tozalash
     </a>
 </div>
 {% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'admin/dashboard.css' %}">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
 
 <div class="max-con">
     <div class="all-diagram">
@@ -39,217 +38,224 @@
         <p>{{ i.name }}</p>
         <canvas id="chart_{{ forloop.counter }}" width="350" height="350"></canvas>
     </div>
-    <script>
-        const ctx{{ forloop.counter }} = document.getElementById("chart_{{ forloop.counter }}").getContext("2d");
-        const total{{ forloop.counter }} = { { i.visited |default: 0 } };
-        const reason{{ forloop.counter }} = { { i.reason |default: 0 } };
-        const no_reason{{ forloop.counter }} = { { i.no_reason |default: 0 } };
+    {% endfor %}
+</div>
 
-        new Chart(ctx{{ forloop.counter }}, {
-            type: "doughnut",
-            data: {
-                labels: ["Kelganlar", "Kelmaganlar", "Sababli"],
-                datasets: [{
-                    data: [total{{ forloop.counter }}, reason{{ forloop.counter }}, no_reason{{ forloop.counter }}],
-            backgroundColor: ["#00b624", "#f44336", "#ebcf00"],
-            borderWidth: 2,
-            hoverOffset: 10
-                }]
-            },
-            options: {
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const uploadBtn = document.getElementById("upload-excel-btn");
+    const refreshBtn = document.getElementById("refresh");
+    const ctx = document.getElementById("studentsChart").getContext("2d");
+
+    // CSRF token olish funksiyasi
+    function getCSRFToken() {
+        // Birinchi navbatda form ichidagi CSRF token ni topish
+        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (tokenInput) {
+            return tokenInput.value;
+        }
+        
+        // Cookie orqali CSRF token ni olish
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            if (cookie.trim().startsWith('csrftoken=')) {
+                return cookie.trim().substring('csrftoken='.length);
+            }
+        }
+        return '';
+    }
+
+    // Refresh tugmasi uchun funksiya
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            
+            if (!confirm("Barcha o'quvchilarning statusini 'Bor' va sababini bo'sh qilasizmi?")) {
+                return;
+            }
+
+            console.log("Refresh bosildi, so'rov yuborilmoqda...");
+
+            fetch("{% url 'set_null_all' %}", { 
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken(),
+                    "Content-Type": "application/json",
+                },
+            })
+            .then(async (response) => {
+                console.log("Javob statusi:", response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP xatolik! Status: ${response.status}`);
+                }
+                
+                return response.json();
+            })
+            .then((data) => {
+                console.log("Server javobi:", data);
+                if (data.success || data.message) {
+                    alert(data.message || "Muvaffaqiyatli amalga oshirildi!");
+                    location.reload();
+                } else if (data.error) {
+                    alert("Xatolik: " + data.error);
+                }
+            })
+            .catch((error) => {
+                console.error("Xatolik:", error);
+                alert("So'rov yuborishda xatolik: " + error.message);
+            });
+        });
+    }
+
+    // Excel yuklash funksiyasi (sizning kodingiz)
+    if (uploadBtn) {
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = ".xlsx";
+        fileInput.style.display = "none";
+        document.body.appendChild(fileInput);
+
+        uploadBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            fileInput.click();
+        });
+
+        fileInput.addEventListener("change", function () {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            fetch("{% url 'export_xlsx_to_models' %}", {  
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRFToken": getCSRFToken(),
+                },
+            })
+            .then(async (res) => {
+                const text = await res.text();
+                try {
+                    const data = JSON.parse(text);
+                    if (data.message) {
+                        alert(data.message);
+                        location.reload();
+                    } else if (data.error) {
+                        alert("Xatolik: " + data.error);
+                    }
+                } catch (err) {
+                    console.error("HTML yoki JSON bo'lmagan javob:", text);
+                    alert("Serverdan noto'g'ri javob keldi.");
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                alert("Xatolik yuz berdi: " + err.message);
+            });
+        });
+    }
+
+    // Diagramma ma'lumotlarini yuklash
+    function fetchDashboardData() {
+        fetch("{% url 'dashboard_inf' %}")  
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                const visited = data.visited || 0;
+                const total = data.total || 0;
+                const reason = data.reason || 0;
+                const no_reason = data.no_reason || 0;
+
+                // Eski diagrammani yo'q qilish
+                if (window.studentsChart) {
+                    window.studentsChart.destroy();
+                }
+
+                // Yangi diagramma yaratish
+                window.studentsChart = new Chart(ctx, {
+                    type: "doughnut",
+                    data: {
+                        labels: ["Kelganlar", "Kelmaganlar", "Sababli"],
+                        datasets: [{
+                            data: [visited, no_reason, reason],
+                            backgroundColor: ["#00b624", "#f44336", "#ebcf00"],
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { 
+                                display: true, 
+                                position: "bottom" 
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const value = context.raw;
+                                        const total = visited + no_reason + reason;
+                                        const percent = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                                        return `${context.label}: ${value} (${percent}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch((err) => {
+                console.error("Diagramma ma'lumotlarini yuklashda xatolik:", err);
+            });
+    }
+
+    fetchDashboardData();
+});
+</script>
+
+<!-- Sinflar diagrammalari uchun alohida script -->
+{% for i in class_stats %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const ctx{{ forloop.counter }} = document.getElementById("chart_{{ forloop.counter }}").getContext("2d");
+    const total{{ forloop.counter }} = {{ i.visited|default:0 }};
+    const reason{{ forloop.counter }} = {{ i.reason|default:0 }};
+    const no_reason{{ forloop.counter }} = {{ i.no_reason|default:0 }};
+
+    new Chart(ctx{{ forloop.counter }}, {
+        type: "doughnut",
+        data: {
+            labels: ["Kelganlar", "Kelmaganlar", "Sababli"],
+            datasets: [{
+                data: [total{{ forloop.counter }}, no_reason{{ forloop.counter }}, reason{{ forloop.counter }}],
+                backgroundColor: ["#00b624", "#f44336", "#ebcf00"],
+                borderWidth: 2,
+                hoverOffset: 10
+            }]
+        },
+        options: {
             plugins: {
                 legend: { display: true, position: "bottom" },
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            const total = total{{ forloop.counter
-                    }
-                } + reason{{ forloop.counter }} + no_reason{{ forloop.counter }};
-        const percent = total > 0 ? (context.raw / total * 100).toFixed(1) : 0;
-        return `${context.label}: ${context.raw} (${percent}%)`;
-                            }
+                            const total = total{{ forloop.counter }} + reason{{ forloop.counter }} + no_reason{{ forloop.counter }};
+                            const percent = total > 0 ? (context.raw / total * 100).toFixed(1) : 0;
+                            return `${context.label}: ${context.raw} (${percent}%)`;
                         }
                     }
                 }
             }
-        });
-    </script>
-    {% empty %}
-    <p>Sinflar yo‘q</p>
-    {% endfor %}
-</div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const uploadBtn = document.getElementById("upload-excel-btn");
-        const refreshBtn = document.getElementById("refresh");
-        const ctx = document.getElementById("studentsChart").getContext("2d");
-
-
-
-        function getCSRFToken() {
-            const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-            if (tokenInput) return tokenInput.value;
-
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                if (cookie.trim().startsWith('csrftoken=')) {
-                    return cookie.trim().substring('csrftoken='.length);
-                }
-            }
-            return '';
         }
-
-        if (uploadBtn) {
-            const fileInput = document.createElement("input");
-            fileInput.type = "file";
-            fileInput.accept = ".xlsx";
-            fileInput.style.display = "none";
-            document.body.appendChild(fileInput);
-
-            uploadBtn.addEventListener("click", function (e) {
-                e.preventDefault();
-                fileInput.click();
-            });
-
-            fileInput.addEventListener("change", function () {
-                const file = fileInput.files[0];
-                if (!file) return;
-
-                const formData = new FormData();
-                formData.append("file", file);
-
-                fetch("https://davomatim.up.railway.app/upload/export_xlsx/", {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        "X-CSRFToken": getCSRFToken(),
-                    },
-                })
-                    .then(async (res) => {
-                        const text = await res.text();
-                        try {
-                            const data = JSON.parse(text);
-                            if (data.message) {
-                                alert(data.message);
-                                location.reload();
-                            } else if (data.error) {
-                                alert("Xatolik: " + data.error);
-                            }
-                        } catch (err) {
-                            console.error("HTML yoki JSON bo‘lmagan javob:", text);
-                            alert("Serverdan noto‘g‘ri javob keldi. URL yoki view nomi tekshirilishi kerak.");
-                        }
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        alert("Xatolik yuz berdi: " + err.message);
-                    });
-            });
-        }
-
-        if (refreshBtn) {
-            refreshBtn.addEventListener("click", function (e) {
-                e.preventDefault();
-                if (!confirm("Barcha o'quvchilarning statusini 'Bor' va sababini bo'sh qilasizmi?")) return;
-
-                // Loading holatini ko'rsatish
-                refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yuklanmoqda...';
-                refreshBtn.disabled = true;
-
-                fetch("https://davomatim.up.railway.app/upload/set_null_all/", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": getCSRFToken(),
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "same-origin",
-                })
-                    .then(async (response) => {
-                        // Avvalo response statusini tekshiramiz
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-
-                        const contentType = response.headers.get("content-type");
-                        if (contentType && contentType.includes("application/json")) {
-                            return response.json();
-                        } else {
-                            const text = await response.text();
-                            throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
-                        }
-                    })
-                    .then((data) => {
-                        console.log("Server javobi:", data);
-
-                        if (data.success) {
-                            alert(data.message);
-                            location.reload();
-                        } else if (data.error) {
-                            alert("Xatolik: " + data.error);
-                        } else {
-                            alert("Noma'lum javob formati");
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Xatolik:", error);
-                        alert("So'rov yuborishda xatolik: " + error.message);
-                    })
-                    .finally(() => {
-                        // Tugmani qayta faollashtirish
-                        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Tozalash';
-                        refreshBtn.disabled = false;
-                    });
-            });
-        }
-
-        
-        function fetchDashboardData() {
-            fetch("/dashboard_inf/")
-                .then((response) => response.json())
-                .then((data) => {
-                    const visited = data.visited;
-                    const total = data.total;
-                    const reason = data.reason;
-                    const no_reason = data.no_reason;
-
-                    new Chart(ctx, {
-                        type: "doughnut",
-                        data: {
-                            labels: ["Kelganlar", "Kelmaganlar", "Sababli"],
-                            datasets: [{
-                                data: [visited, reason, no_reason],
-                                backgroundColor: ["#00b624", "#f44336", "#ebcf00"],
-                                borderWidth: 2,
-                                hoverOffset: 10
-                            }]
-                        },
-                        options: {
-                            plugins: {
-                                legend: { display: true, position: "bottom" },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function (context) {
-                                            let value = context.raw;
-                                            let percent = total > 0 ? (value / total * 100).toFixed(1) : 0;
-                                            return `${context.label}: ${value} (${percent}%)`;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-                })
-                .catch((err) => {
-                    console.error("Xatolik:", err);
-                    alert("Serverdan ma'lumot olishda xatolik yuz berdi.");
-                });
-        }
-
-        fetchDashboardData();
     });
+});
 </script>
+{% endfor %}
+
 {% endblock %}
-
-
-mana shu yerda faqat hamma oquvchilarni tozalash yani refresh tugmasi ishlamayapti
