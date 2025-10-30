@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 import openpyxl as xl
 from django.db import transaction
 from teachers.models import Class, ClassName
@@ -81,13 +82,19 @@ def export_xlsx_to_models(request):
     return JsonResponse({"message": f"{count} ta o‘quvchi muvaffaqiyatli import qilindi ✅"})
 
 @csrf_exempt
+@require_POST
 def set_null_all(request):
-    if request.method != "POST":
+    try:
+        from students.models import Student
+        
+        updated_count = Student.objects.update(status="Bor", sababi="", this_updated=False)
+        
         return JsonResponse({
-            "error":"Method not allowed"
+            "success": True,
+            "message": f"{updated_count} ta o'quvchining statusi 'Bor' va sababi bo'sh qilindi ✅"
         })
-    
-    updated_count = Student.objects.update(status="Bor", sababi="", this_updated=False)
-    return JsonResponse({
-        "message": f"{updated_count} ta o‘quvchining statusi 'Bor' va sababi bo‘sh qilindi ✅"
-    })
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        }, status=500)
