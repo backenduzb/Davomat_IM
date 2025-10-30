@@ -56,8 +56,6 @@ async def start(message: types.Message, state: FSMContext):
                         sababi = s["sababi"] or "Sabab ko‘rsatilmagan"
                         text += f"{i}. {s['full_name']} — <i>{sababi}</i>\n"
 
-                text += "\n"
-
             if summary:
                 from django.utils import timezone
                 import pytz
