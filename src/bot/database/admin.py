@@ -16,6 +16,25 @@ def get_admin_tg_ids():
     return list(Admin.objects.values_list("telegram_id", flat=True))
 
 @sync_to_async
+def set_class_students_null(class_name: str):
+    from teachers.models import Class
+    from students.models import Student
+
+    class_ = Class.objects.get(class_name__name=class_name)  
+    students = class_.students.all()
+
+    for student in students:
+        student.sababi = ""
+        student.status = "Bor"  
+        student.save()
+
+    class_.this_updated = True
+    class_.save()
+
+    return f"{class_name} sinfidagi {students.count()} o‘quvchi yangilandi."
+
+
+@sync_to_async
 def get_all_class():
     from teachers.models import ClassName
     return list(ClassName.objects.values_list('name', flat=True))
@@ -67,15 +86,12 @@ def get_all_no():
                 "sababi": s['sababi']
             })
             total_no_reason += 1
-
-    # Foizlar
     for class_name, info in result.items():
         total = info["total"]
         absent = len(info["reason"]) + len(info["no_reason"])
         present = total - absent
         result[class_name]["present_percent"] = round((present / total) * 100, 1) if total else 0
 
-    # Umumiy ma'lumot
     total_absent = total_reason + total_no_reason
     total_present_percent = round(((total_students - total_absent) / total_students) * 100, 1) if total_students else 0
 

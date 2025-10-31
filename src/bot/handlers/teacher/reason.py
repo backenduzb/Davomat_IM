@@ -6,6 +6,7 @@ from bot.database.teacher import get_teacher_information
 from bot.keyboards.inline.button import finish_or_continue, finish
 from bot.keyboards.reply.student import students_keyboard
 from bot.keyboards.reply.student import reastart
+from bot.database.admin import set_class_students_null
 
 router = Router()
 
@@ -80,7 +81,7 @@ async def finish_reason_list(callback: types.CallbackQuery, state: FSMContext):
     teacher_id = str(callback.from_user.id)
     teacher = await get_teacher_information(teacher_id)
     class_name = teacher.get("class_name", "Noma'lum sinf")
-
+    await set_class_students_null(class_name)
     for name in no_reason_students:
         try:
             student_id = await get_student_id(name, teacher_id)

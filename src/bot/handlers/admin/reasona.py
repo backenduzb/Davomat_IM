@@ -1,5 +1,5 @@
 from aiogram import Router, types, F
-from bot.database.admin import get_admin_tg_ids, get_student_id
+from bot.database.admin import get_admin_tg_ids, get_student_id, set_class_students_null
 from bot.keyboards.reply.admin import all_students
 from bot.keyboards.reply.student import reastart
 from aiogram.fsm.context import FSMContext
@@ -82,7 +82,7 @@ async def finish_reason_list(callback: types.CallbackQuery, state: FSMContext):
     no_reason_students = data.get("no_reason_students", [])  
 
     class_name = data.get('class_name')
-
+    await set_class_students_null(class_name)
     for name in no_reason_students:
         try:
             student_id = await get_student_id(name, class_name)
