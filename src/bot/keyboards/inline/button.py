@@ -2,7 +2,6 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 async def finish_or_continue(inf: str) -> InlineKeyboardMarkup:
     buttons = [
-        [InlineKeyboardButton(text="Tozalash 🗑", callback_data=f"clear_{inf}")],
         [InlineKeyboardButton(text="Tugatish ✅", callback_data=f"finish_{inf}")],
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
