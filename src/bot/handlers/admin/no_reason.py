@@ -52,7 +52,7 @@ async def reason_students(message: types.Message, state: FSMContext):
 @router.callback_query(F.data == "finish_no_reason_admin")
 async def finish_no_reason(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.answer(
-        f"Sabasli kelgan o'quvchilar bormi?",
+        f"Sababli kelgan o'quvchilar bormi?",
         reply_markup=await finish(inf="reason_admin")
     )
     await state.set_state(None)
