@@ -10,6 +10,6 @@ async def finish_or_continue(inf: str) -> InlineKeyboardMarkup:
 async def finish(inf: str) -> InlineKeyboardMarkup:
     button = [
         [InlineKeyboardButton(text="Sababsizlarni kirtish ➕" if inf=="no_reason_admin" or inf=="no_reason_teacher" else "Sabablilarni kirtish ➕", callback_data=f"have_{inf}")],
-        [InlineKeyboardButton(text="Sababsizlar yo'q ✅" if inf=="no_reason_admin" or inf=="no_reason_teacher" else "Sabalilar yo'q ✅", callback_data=f"finish_{inf}")],
+        [InlineKeyboardButton(text="Sababsizlar yo'q ✅" if inf=="no_reason_admin" or inf=="no_reason_teacher" else "Sabablilar yo'q ✅", callback_data=f"finish_{inf}")],
     ]
     return InlineKeyboardMarkup(inline_keyboard=button)

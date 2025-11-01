@@ -61,7 +61,7 @@ async def reason_students(message: types.Message, state: FSMContext):
 async def finish_no_reason(callback: types.CallbackQuery, state: FSMContext):
     teacher = await get_teacher_information(str(callback.from_user.id))
     await callback.message.answer(
-        f"<b>{teacher.get("teacher_name")}</b> sabasli kelgan o'quvchilar bormi?",
+        f"<b>{teacher.get("teacher_name")}</b> sababli kelgan o'quvchilar bormi?",
         reply_markup=await finish(inf="reason_teacher")
     )
     await state.set_state(None)
@@ -71,7 +71,7 @@ async def finish_no_reason(callback: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data=="clear_no_reason_teacher")
 async def clear_reason(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(no_reason_students=[])
-    await callback.answer("Sababli o'quvchilar ro'yhati tozalandi.", show_alert=True)
+    await callback.answer("Sabalsiz o'quvchilar ro'yhati tozalandi.", show_alert=True)
     teacher = await get_teacher_information(teacher_id=str(callback.from_user.id))
 
     await state.set_state(TeacherStates.waiting_no_reason_student)
