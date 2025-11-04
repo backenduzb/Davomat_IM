@@ -42,7 +42,7 @@ async def start(message: types.Message, state: FSMContext):
 
             for class_name, info in data.items():
                 if info["reason"] or info["no_reason"]:
-                    text += f"🏫 <b>{class_name}</b> — {info['present_percent']}% o‘quvchi kelgan\n"
+                    text += f"\n🏫 <b>{class_name} — {info['present_percent']} \n</b>"
 
                 if info["reason"]:
                     text += "\n🟡 <b>Sababli yo‘qlar:</b>\n"
