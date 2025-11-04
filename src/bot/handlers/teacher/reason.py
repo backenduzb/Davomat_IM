@@ -103,10 +103,35 @@ async def finish_reason_list(callback: types.CallbackQuery, state: FSMContext):
         [f"💤 <b>{name}</b> — <i>{reason}</i>" for name, reason in reason_students.items()]
     )
 
+    from django.utils import timezone
+    import pytz
+
+    uz_time = pytz.timezone("Asia/Tashkent")
+    now_uz = timezone.now().astimezone(uz_time)
+
+    oylar = {
+        "January": "yanvar",
+        "February": "fevral",
+        "March": "mart",
+        "April": "aprel",
+        "May": "may",
+        "June": "iyun",
+        "July": "iyul",
+        "August": "avgust",
+        "September": "sentyabr",
+        "October": "oktyabr",
+        "November": "noyabr",
+        "December": "dekabr",
+    }
+
+    oy_nomi = oylar[now_uz.strftime("%B")]
+    formatted_date = now_uz.strftime(f"%Y-yil %d-{oy_nomi}")
+
     await callback.message.answer(
         f"📊 <b>{class_name}</b> sinfi bo‘yicha kelmaganlar ma’lumotlari yangilandi ✅\n\n"
         f"🚫 <b>Sababsizlar:</b>\n{no_reason_text}\n\n"
-        f"🟡 <b>Sabablilar:</b>\n{reason_text}",
+        f"🟡 <b>Sabablilar:</b>\n{reason_text}"
+        f"{formatted_date}da oxirgi marta yangilandi.",
         reply_markup=await reastart()
     )
 
