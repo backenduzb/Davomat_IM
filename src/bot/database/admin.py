@@ -86,11 +86,11 @@ def get_all_no():
                 "sababi": s['sababi']
             })
             total_no_reason += 1
+
     for class_name, info in result.items():
         total = info["total"]
         absent = len(info["reason"]) + len(info["no_reason"])
-        present = total - absent
-        result[class_name]["present_percent"] = round((present / total) * 100, 1) if total else 0
+        result[class_name]["present_percent"] = f"{total}/{absent}"
 
     total_absent = total_reason + total_no_reason
     total_present_percent = round(((total_students - total_absent) / total_students) * 100, 1) if total_students else 0
