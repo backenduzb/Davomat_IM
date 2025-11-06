@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from students.models import Student
+from teachers.models import Class
 from django.conf import settings
 from upload.tg_uploader import upload_document
 import os, time
@@ -45,5 +46,7 @@ class Command(BaseCommand):
 
         time.sleep(5)
         upload_document(document=file_name)
-
+        time.sleep(5)
+        Student.objects.update(sababi=" ",status="Bor")
+        Class.objects.update(this_updated=False)
         self.stdout.write(self.style.SUCCESS(f"{len(students)} ta kelmagan o‘quvchi '{file_name}' fayliga eksport qilindi ✅"))
