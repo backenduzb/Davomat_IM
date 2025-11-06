@@ -47,6 +47,6 @@ class Command(BaseCommand):
         time.sleep(5)
         upload_document(document=file_name)
         time.sleep(5)
-        Student.objects.update(sababi=" ",status="Bor")
-        Class.objects.update(this_updated=False)
+        updated_count = Student.objects.update(status="Bor", sababi="")
+        class_count = Class.objects.update(this_updated=False)
         self.stdout.write(self.style.SUCCESS(f"{len(students)} ta kelmagan o‘quvchi '{file_name}' fayliga eksport qilindi ✅"))

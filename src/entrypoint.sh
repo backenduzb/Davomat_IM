@@ -1,4 +1,4 @@
-python3 manage.py dailiy_task --no-input
+python3 manage.py dailiy_task 
 
 python3 manage.py makemigrations --no-input
 python3 manage.py migrate --no-input
