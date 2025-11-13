@@ -40,10 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'core.apps.CoreConfig',
     'students',
     'teachers',
     'upload',
-    'main'
+    'main',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
