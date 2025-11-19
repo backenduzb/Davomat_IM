@@ -6,7 +6,7 @@ uz_tz = pytz.timezone("Asia/Tashkent")
 now_date = datetime.now(uz_tz)
 now_caption = now_date.strftime("%Y/%m/%d")  
 
-BOT_TOKEN = "7102026834:AAFnKJiSiecmgd_giX25CzeTRGAvf1ec0Zs"
+BOT_TOKEN = "7102026834:AAFWG8tOkxTFkLX7HeUIC3kqodVwWZ01iNw"
 GROUP_ID = "-1003013595617"
 
 def upload_document(document):

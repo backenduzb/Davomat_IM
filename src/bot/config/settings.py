@@ -1,6 +1,6 @@
 from aiogram.client.default import DefaultBotProperties
 
-BOT_TOKEN = "8355686555:AAGWJvvTZ5SGLJFaVABFhq9XHdPXwTqn3Ig"
+BOT_TOKEN = "7102026834:AAFWG8tOkxTFkLX7HeUIC3kqodVwWZ01iNw"
 
 DEFAULT_PROPERTIES = DefaultBotProperties(
     parse_mode="HTML"
