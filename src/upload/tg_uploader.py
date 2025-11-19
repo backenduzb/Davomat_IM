@@ -9,7 +9,7 @@ now_caption = now_date.strftime("%Y/%m/%d")
 BOT_TOKEN = "7102026834:AAFnKJiSiecmgd_giX25CzeTRGAvf1ec0Zs"
 GROUP_ID = "-1003013595617"
 
-def upload_document(document="Davomat.xlsx"):
+def upload_document(document):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
     data = {
         "chat_id": GROUP_ID,

@@ -18,6 +18,7 @@ class Class(models.Model):
     students = models.ManyToManyField("students.Student")
 
     this_updated = models.BooleanField(default=False, null=True, blank=True, verbose_name="Yangilanganmi")
+    updated_al = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return f"{self.class_name}"
