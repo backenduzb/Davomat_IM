@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: backenduzb/davomatim
+  IMAGE_NAME: backenduzb/Davomat_IM
   IMAGE_TAG: main
 
 permissions:
