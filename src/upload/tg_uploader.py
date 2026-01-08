@@ -1,13 +1,12 @@
 import requests
 from datetime import datetime
 import pytz
+from bot.config.settings import BOT_TOKEN, GROUP_ID
 
 uz_tz = pytz.timezone("Asia/Tashkent")
 now_date = datetime.now(uz_tz)
 now_caption = now_date.strftime("%Y/%m/%d")  
 
-BOT_TOKEN = "7102026834:AAFWG8tOkxTFkLX7HeUIC3kqodVwWZ01iNw"
-GROUP_ID = "-1003013595617"
 
 def upload_document(document):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"

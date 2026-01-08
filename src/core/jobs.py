@@ -4,11 +4,17 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from students.models import Student
 from django.conf import settings
+from datetime import datetime
+import pytz
 import time
 import os
-
+)  
 
 def export_data():
+    uz_tz = pytz.timezone("Asia/Tashkent")
+    now_date = datetime.now(uz_tz)
+    now_caption = now_date.strftime("%Y/%m/%d")
+    
     wb = Workbook()
     ws = wb.active
     ws.title = "Davomat"
@@ -32,7 +38,7 @@ def export_data():
         ws.cell(row=row_num, column=1, value=idx)
         ws.cell(row=row_num, column=2, value=student.full_name)
         ws.cell(row=row_num, column=3, value=str(student.class_type.class_name))
-        ws.cell(row=row_num, column=4, value="")
+        ws.cell(row=row_num, column=4, value=now_caption)
         ws.cell(row=row_num, column=5, value=student.sababi or "-")
         row_num += 1
 

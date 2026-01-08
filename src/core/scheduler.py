@@ -6,12 +6,16 @@ scheduler = BackgroundScheduler(timezone=str(timezone.get_current_timezone()))
 
 def start():
     global scheduler
-    if not scheduler.running: 
-        scheduler = BackgroundScheduler(timezone=str(timezone.get_current_timezone()))
+
+    if not scheduler.running:
+        scheduler.start()
+
+    if not scheduler.get_job("export_job"):
         scheduler.add_job(
             export_data,
             'cron',
             hour=19,
-            minute=0
+            minute=0,
+            id="export_job",
+            replace_existing=True
         )
-        scheduler.start()

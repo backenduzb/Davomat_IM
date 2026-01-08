@@ -104,7 +104,7 @@ else:
             'USER': os.getenv("POSTGRES_USERNAME"),
             'PASSWORD': os.getenv("POSTGRES_PASSWORD"),
             'HOST': os.getenv("POSTGRES_HOST"),
-            'PORT': int(os.getenv("POSTGRES_PORT")),
+            'PORT': os.getenv("POSTGRES_PORT"),
         }
     }
 
