@@ -10,6 +10,11 @@ env:
   IMAGE_NAME: backenduzb/davomatim
   IMAGE_TAG: main
 
+permissions:
+  contents: read
+  packages: write
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
