@@ -29,3 +29,4 @@ whitenoise
 pytz
 requests
 apscheduler
+python-dotenv
