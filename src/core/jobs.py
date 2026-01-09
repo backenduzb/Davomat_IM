@@ -8,7 +8,7 @@ from datetime import datetime
 import pytz
 import time
 import os
-)  
+
 
 def export_data():
     uz_tz = pytz.timezone("Asia/Tashkent")
