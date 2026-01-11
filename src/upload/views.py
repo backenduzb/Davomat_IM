@@ -94,5 +94,5 @@ def set_null_all(request):
         print(e)
         return JsonResponse({
             "success": False,
-            "error": str(e)
         }, status=500)
+        

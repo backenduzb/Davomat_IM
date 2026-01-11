@@ -43,12 +43,12 @@ def export_data():
         row_num += 1
 
     file_name = os.path.join(settings.BASE_DIR, "Davomat.xlsx")
-
+    
     try:
         os.remove(file_name)
     except FileNotFoundError:
         pass
-
+    wb.save(file_name)
     time.sleep(3)
     upload_document(document=file_name)
     time.sleep(3)
