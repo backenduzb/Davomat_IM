@@ -84,4 +84,15 @@ def export_xlsx_to_models(request):
 @csrf_exempt
 @require_POST
 def set_null_all(request):
-    export_data()
+    try:
+        export_data()
+        return JsonResponse({
+            "success": True,
+            "message": f"{updated_count} ta o'quvchini {class_count}ta sinf bo'sh qilindi ✅"
+        })
+    except Exception as e:
+        print(e)
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        }, status=500)
