@@ -88,7 +88,7 @@ def set_null_all(request):
         export_data()
         return JsonResponse({
             "success": True,
-            "message": f"{updated_count} ta o'quvchini {class_count}ta sinf bo'sh qilindi ✅"
+            "message": f"Sinflar bo'sh qilindi ✅"
         })
     except Exception as e:
         print(e)
