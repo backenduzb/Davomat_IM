@@ -6,7 +6,7 @@ class CoreConfig(AppConfig):
     name = "core"
 
     def ready(self):
-        if os.environ.get("RUN_MAIN") != "true":
+        if os.environ.get("RUN_SCHEDULER") != "true":
             return
 
         from .scheduler import start
