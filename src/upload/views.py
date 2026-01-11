@@ -5,7 +5,7 @@ import openpyxl as xl
 from django.db import transaction
 from teachers.models import Class, ClassName
 from students.models import Student
-
+from core.jobs import export_data
 
 def to_latin(text: str) -> str:
     mapping = {
@@ -84,20 +84,4 @@ def export_xlsx_to_models(request):
 @csrf_exempt
 @require_POST
 def set_null_all(request):
-    try:
-        from students.models import Student
-        from teachers.models import Class
-
-        
-        updated_count = Student.objects.update(status="Bor", sababi="")
-        
-        class_count = Class.objects.update(this_updated=False)
-        return JsonResponse({
-            "success": True,
-            "message": f"{updated_count} ta o'quvchini {class_count}ta sinf bo'sh qilindi ✅"
-        })
-    except Exception as e:
-        return JsonResponse({
-            "success": False,
-            "error": str(e)
-        }, status=500)
+    export_data()
