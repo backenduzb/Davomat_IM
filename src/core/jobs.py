@@ -44,9 +44,10 @@ def export_data():
 
     file_name = os.path.join(settings.BASE_DIR, "Davomat.xlsx")
 
-    if os.path.exists(file_name):
+    try:
         os.remove(file_name)
-    wb.save(file_name)
+    except FileNotFoundError:
+        pass
 
     time.sleep(3)
     upload_document(document=file_name)
