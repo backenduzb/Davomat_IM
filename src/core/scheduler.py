@@ -15,7 +15,7 @@ def start():
             export_data,
             'cron',
             hour=23,
-            minute=10,
+            minute=15,
             id="export_job",
             replace_existing=True
         )
