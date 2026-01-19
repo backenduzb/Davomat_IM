@@ -50,7 +50,7 @@ def export_data():
         pass
     wb.save(file_name)
     time.sleep(3)
-    upload_document(document=file_name)
+    upload_document(document_path=file_name)
     time.sleep(3)
     updated_count = Student.objects.update(status="Bor", sababi="")
     class_count = Class.objects.update(this_updated=False)
