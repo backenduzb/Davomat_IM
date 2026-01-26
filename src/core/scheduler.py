@@ -43,8 +43,8 @@ def start():
         scheduler.add_job(
             export_data,
             "cron",
-            hour=23,
-            minute=15,
+            hour=16,
+            minute=10,
             id="export_job",
             replace_existing=True,
         )
