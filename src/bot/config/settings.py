@@ -1,6 +1,10 @@
 from aiogram.client.default import DefaultBotProperties
+from dotenv import load_dotenv
+import os
 
-BOT_TOKEN = "7102026834:AAFWG8tOkxTFkLX7HeUIC3kqodVwWZ01iNw"
+load_dotenv()
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 GROUP_ID = "-1003013595617"
 DEFAULT_PROPERTIES = DefaultBotProperties(
     parse_mode="HTML"
@@ -9,5 +13,5 @@ DEFAULT_PROPERTIES = DefaultBotProperties(
 WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = 8080
 WEBHOOK_PATH = "/webhook"
-WEBHOOK_SECRET = "webhook_AAFnKJiSiecmgd_giX25CzeTRGAvf1ec0Zs"
-BASE_WEBHOOK_URL = "https://telegram-davomatim.abdulkhafizov.uz"
+WEBHOOK_SECRET = os.getenv("BOT_WEBHOOK_SECRET")
+BASE_WEBHOOK_URL = os.getenv("BOT_BASE_URL")
