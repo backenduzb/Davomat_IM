@@ -8,7 +8,7 @@ from utils.time import current_time
 from utils.upload import upload_document
 
 @transaction.atomic
-def export_data_job():
+def export_data():
     now_caption = current_time()
 
     wb = Workbook()
