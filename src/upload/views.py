@@ -1,31 +1,97 @@
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.decorators.http import require_POST
-from teachers.models import Class, ClassName
-from django.http import JsonResponse
-from students.models import Student
-from django.db import transaction
-from core.jobs import export_data
 import openpyxl as xl
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db import transaction
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.http import require_POST
+
+from core.jobs import export_data
+from students.models import Student
+from teachers.models import Class, ClassName
 
 
 def is_admin(user):
-    return user.is_authenticated and user.is_staff 
+    return user.is_authenticated and user.is_staff
+
 
 def to_lotin(text: str) -> str:
     mapping = {
-        "А":"A","а":"a","Б":"B","б":"b","В":"V","в":"v","Г":"G","г":"g",
-        "Д":"D","д":"d","Е":"E","е":"e","Ё":"Yo","ё":"yo","Ж":"J","ж":"j",
-        "З":"Z","з":"z","И":"I","и":"i","Й":"Y","й":"y","К":"K","к":"k",
-        "Л":"L","л":"l","М":"M","м":"m","Н":"N","н":"n","О":"O","о":"o",
-        "П":"P","п":"p","Р":"R","р":"r","С":"S","с":"s","Т":"T","т":"t",
-        "У":"U","у":"u","Ф":"F","ф":"f","Х":"X","х":"x","Ц":"Ts","ц":"ts",
-        "Ч":"Ch","ч":"ch","Ш":"Sh","ш":"sh","Щ":"Sh","щ":"sh","Ъ":"","ъ":"",
-        "Ы":"I","ы":"i","Э":"E","э":"e","Ю":"Yu","ю":"yu","Я":"Ya","я":"ya",
-        "Ғ":"G‘","ғ":"g‘","Ў":"O‘","ў":"o‘","Қ":"Q","қ":"q","Ҳ":"H","ҳ":"h",
-        "’": "'", "‘": "'",
+        "А": "A",
+        "а": "a",
+        "Б": "B",
+        "б": "b",
+        "В": "V",
+        "в": "v",
+        "Г": "G",
+        "г": "g",
+        "Д": "D",
+        "д": "d",
+        "Е": "E",
+        "е": "e",
+        "Ё": "Yo",
+        "ё": "yo",
+        "Ж": "J",
+        "ж": "j",
+        "З": "Z",
+        "з": "z",
+        "И": "I",
+        "и": "i",
+        "Й": "Y",
+        "й": "y",
+        "К": "K",
+        "к": "k",
+        "Л": "L",
+        "л": "l",
+        "М": "M",
+        "м": "m",
+        "Н": "N",
+        "н": "n",
+        "О": "O",
+        "о": "o",
+        "П": "P",
+        "п": "p",
+        "Р": "R",
+        "р": "r",
+        "С": "S",
+        "с": "s",
+        "Т": "T",
+        "т": "t",
+        "У": "U",
+        "у": "u",
+        "Ф": "F",
+        "ф": "f",
+        "Х": "X",
+        "х": "x",
+        "Ц": "Ts",
+        "ц": "ts",
+        "Ч": "Ch",
+        "ч": "ch",
+        "Ш": "Sh",
+        "ш": "sh",
+        "Щ": "Sh",
+        "щ": "sh",
+        "Ъ": "",
+        "ъ": "",
+        "Ы": "I",
+        "ы": "i",
+        "Э": "E",
+        "э": "e",
+        "Ю": "Yu",
+        "ю": "yu",
+        "Я": "Ya",
+        "я": "ya",
+        "Ғ": "G‘",
+        "ғ": "g‘",
+        "Ў": "O‘",
+        "ў": "o‘",
+        "Қ": "Q",
+        "қ": "q",
+        "Ҳ": "H",
+        "ҳ": "h",
+        "’": "'",
+        "‘": "'",
     }
-    return ''.join(mapping.get(ch, ch) for ch in text)
+    return "".join(mapping.get(ch, ch) for ch in text)
 
 
 @csrf_protect
@@ -34,7 +100,6 @@ def to_lotin(text: str) -> str:
 @require_POST
 @transaction.atomic
 def export_xlsx_to_models(request):
-    
     if request.method != "POST" or "file" not in request.FILES:
         return JsonResponse({"error": "Fayl yuborilmadi."}, status=400)
 
@@ -51,7 +116,9 @@ def export_xlsx_to_models(request):
         fish_col = headers.index("I.F.Sh") + 1
         sinf_col = headers.index("Sinf") + 1
     except ValueError:
-        return JsonResponse({"error": "Excel faylda 'I.F.Sh' yoki 'Sinf' ustuni topilmadi."}, status=400)
+        return JsonResponse(
+            {"error": "Excel faylda 'I.F.Sh' yoki 'Sinf' ustuni topilmadi."}, status=400
+        )
 
     count = 0
     for row in sheet.iter_rows(min_row=2, values_only=True):
@@ -71,13 +138,12 @@ def export_xlsx_to_models(request):
             defaults={
                 "class_teacher_full_name": "Noma’lum",
                 "class_teacher_tg_id": "0",
-                "this_updated": False
+                "this_updated": False,
             },
         )
 
         student_obj, created = Student.objects.get_or_create(
-            full_name=fish,
-            defaults={"class_type": class_obj}
+            full_name=fish, defaults={"class_type": class_obj}
         )
 
         if not student_obj.class_type:
@@ -87,7 +153,9 @@ def export_xlsx_to_models(request):
         class_obj.students.add(student_obj)
         count += 1
 
-    return JsonResponse({"message": f"{count} ta o‘quvchi muvaffaqiyatli import qilindi ✅"})
+    return JsonResponse(
+        {"message": f"{count} ta o‘quvchi muvaffaqiyatli import qilindi ✅"}
+    )
 
 
 @csrf_protect
@@ -97,13 +165,12 @@ def export_xlsx_to_models(request):
 def set_null_all(request):
     try:
         export_data()
-        return JsonResponse({
-            "success": True,
-            "message": f"Sinflar bo'sh qilindi ✅"
-        })
+        return JsonResponse({"success": True, "message": f"Sinflar bo'sh qilindi ✅"})
     except Exception as e:
         print(e)
-        return JsonResponse({
-            "success": False,
-        }, status=500)
-        
+        return JsonResponse(
+            {
+                "success": False,
+            },
+            status=500,
+        )

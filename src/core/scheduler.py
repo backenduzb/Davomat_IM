@@ -1,8 +1,10 @@
 import fcntl
 import os
 import tempfile
+
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.utils import timezone
+
 from .jobs import export_data
 
 scheduler = BackgroundScheduler(timezone=str(timezone.get_current_timezone()))
@@ -27,6 +29,7 @@ def _acquire_lock():
     _lock_file = lock_file
     return True
 
+
 def start():
     global scheduler
 
@@ -39,9 +42,9 @@ def start():
     if not scheduler.get_job("export_job"):
         scheduler.add_job(
             export_data,
-            'cron',
+            "cron",
             hour=23,
             minute=15,
             id="export_job",
-            replace_existing=True
+            replace_existing=True,
         )

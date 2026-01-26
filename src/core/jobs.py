@@ -1,17 +1,22 @@
+import os
+import time
+
+from django.conf import settings
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db import transaction
 from django.views.decorators.csrf import csrf_protect
-from utils.upload import upload_document
-from teachers.models import Class
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
+
 from students.models import Student
+from teachers.models import Class
 from utils.time import current_time
-from django.conf import settings
-import time
-import os
+from utils.upload import upload_document
+
 
 def is_admin(user):
     return user.is_authenticated and user.is_staff
+
 
 @csrf_protect
 @login_required
@@ -19,7 +24,7 @@ def is_admin(user):
 @transaction.atomic
 def export_data():
     now_caption = current_time()
-    
+
     wb = Workbook()
     ws = wb.active
     ws.title = "Davomat"
@@ -48,7 +53,7 @@ def export_data():
         row += 1
 
     file_name = os.path.join(settings.BASE_DIR, "Davomat.xlsx")
-    
+
     try:
         os.remove(file_name)
     except FileNotFoundError:
@@ -56,7 +61,7 @@ def export_data():
     wb.save(file_name)
     time.sleep(3)
     upload_document(document_path=file_name)
-    
+
     time.sleep(3)
     Student.objects.update(status="Bor", sababi="")
     Class.objects.update(this_updated=False)
