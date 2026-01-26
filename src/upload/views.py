@@ -1,13 +1,18 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
-import openpyxl as xl
-from django.db import transaction
 from teachers.models import Class, ClassName
+from django.http import JsonResponse
 from students.models import Student
+from django.db import transaction
 from core.jobs import export_data
+import openpyxl as xl
 
-def to_latin(text: str) -> str:
+
+def is_admin(user):
+    return user.is_authenticated and user.is_staff 
+
+def to_lotin(text: str) -> str:
     mapping = {
         "А":"A","а":"a","Б":"B","б":"b","В":"V","в":"v","Г":"G","г":"g",
         "Д":"D","д":"d","Е":"E","е":"e","Ё":"Yo","ё":"yo","Ж":"J","ж":"j",
@@ -23,7 +28,10 @@ def to_latin(text: str) -> str:
     return ''.join(mapping.get(ch, ch) for ch in text)
 
 
-@csrf_exempt
+@csrf_protect
+@login_required
+@user_passes_test(is_admin)
+@require_POST
 @transaction.atomic
 def export_xlsx_to_models(request):
     
@@ -53,7 +61,7 @@ def export_xlsx_to_models(request):
         if not fish or not sinf:
             continue
 
-        fish = to_latin(fish.strip().title())
+        fish = to_lotin(fish.strip().title())
         sinf = str(sinf).strip()
 
         class_name_obj, _ = ClassName.objects.get_or_create(name=sinf)
@@ -81,7 +89,10 @@ def export_xlsx_to_models(request):
 
     return JsonResponse({"message": f"{count} ta o‘quvchi muvaffaqiyatli import qilindi ✅"})
 
-@csrf_exempt
+
+@csrf_protect
+@login_required
+@user_passes_test(is_admin)
 @require_POST
 def set_null_all(request):
     try:
