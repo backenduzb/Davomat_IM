@@ -6,6 +6,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 GROUP_ID = "-1003013595617"
+ARCHIVE_GROUP = "-1003779159220"
 DEFAULT_PROPERTIES = DefaultBotProperties(
     parse_mode="HTML"
 )

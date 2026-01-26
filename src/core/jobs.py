@@ -1,20 +1,14 @@
-import os
-import time
-
-from django.conf import settings
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
-from django.views.decorators.csrf import csrf_protect
+import os, tempfile
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
-
 from students.models import Student
 from teachers.models import Class
 from utils.time import current_time
 from utils.upload import upload_document
 
 @transaction.atomic
-def export_data():
+def export_data_job():
     now_caption = current_time()
 
     wb = Workbook()
@@ -44,17 +38,17 @@ def export_data():
         ws.cell(row=row, column=5, value=student.sababi or "-")
         row += 1
 
-    file_name = os.path.join(settings.BASE_DIR, "Davomat.xlsx")
+    tmp = tempfile.NamedTemporaryFile(prefix="davomat_", suffix=".xlsx", delete=False)
+    file_name = tmp.name
+    tmp.close()
+
+    wb.save(file_name)
+    upload_document(document_path=file_name)
 
     try:
         os.remove(file_name)
     except FileNotFoundError:
         pass
-    wb.save(file_name)
-    time.sleep(3)
 
-    upload_document(document_path=file_name)
-
-    time.sleep(3)
     Student.objects.update(status="Bor", sababi="")
     Class.objects.update(this_updated=False)
