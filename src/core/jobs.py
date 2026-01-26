@@ -13,14 +13,6 @@ from teachers.models import Class
 from utils.time import current_time
 from utils.upload import upload_document
 
-
-def is_admin(user):
-    return user.is_authenticated and user.is_staff
-
-
-@csrf_protect
-@login_required
-@user_passes_test(is_admin)
 @transaction.atomic
 def export_data():
     now_caption = current_time()
@@ -60,6 +52,7 @@ def export_data():
         pass
     wb.save(file_name)
     time.sleep(3)
+
     upload_document(document_path=file_name)
 
     time.sleep(3)
