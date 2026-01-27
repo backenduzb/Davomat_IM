@@ -126,10 +126,11 @@ async def finish_reason_list(callback: types.CallbackQuery, state: FSMContext):
             ]
         )
     )
-
-    from utils.time import current_time
-
-    now_uz = current_time()
+    from django.utils import timezone
+    import pytz
+    
+    uz_time = pytz.timezone("Asia/Tashkent")
+    now_uz = timezone.now().astimezone(uz_time)
 
     oylar = {
         "January": "yanvar",
